@@ -12,24 +12,29 @@ internal class Program
         //        List<Author> authorList = new List<Author>();
         List<Book> bookList = new List<Book>();
 
+        Console.WriteLine("\n §§§§§§ ° ARQUIVO DE LIVROS ° §§§§§§§ \n");
         do
         {
             op = Menu();
             switch (op)
             {
                 case 0:
+                    Console.WriteLine("\n §§§§§§ ° fim do programa ° §§§§§§§ \n");
                     System.Environment.Exit(0);
                     flag = true;
                     break;
                 case 1:
                     bookList.Add(CreateBook());
-                    LerSepararLista(bookList);
                     break;
                 case 2:
                     PrintBookList(bookList);
                     break;
                 case 3:
-                    PrintBookList(EstanteParaLista());                    
+                    LerSepararLista(bookList);
+                    bookList.Clear();
+                    break;
+                case 4:
+                    PrintBookList(EstanteParaLista());
                     break;
                     
             }
@@ -40,12 +45,13 @@ internal class Program
         int Menu()
         {
             Console.WriteLine("Digite a opção:");
-            Console.WriteLine("0 - Sair");
-            Console.WriteLine("1 - Adicionar novo livro a estante");
-            Console.WriteLine("2 - Exibir lista de livros");
-            Console.WriteLine("3 - Arquivo dos livros da estante");
-            Console.WriteLine("4 - Arquivo dos livros que estou lendo");
-            Console.WriteLine("5 - Arquivo dos livros emprestados");
+            Console.WriteLine("     0 - Sair");
+            Console.WriteLine("     1 - Adicionar novo livro a estante");
+            Console.WriteLine("     2 - Exibir lista de livros");
+            Console.WriteLine("     3 - Gravar dados da lista nos Arquivos e LIMPAR lista");
+            Console.WriteLine("     4 - Arquivo dos livros da estante");
+            Console.WriteLine("     5 - Arquivo dos livros que estou lendo");
+            Console.WriteLine("     6 - Arquivo dos livros emprestados");
             op = int.Parse(Console.ReadLine());
             return op;
         }
@@ -261,10 +267,39 @@ internal class Program
             StreamReader sr = new("livrosEstante.txt");
             string txt = "";
             string aux = "";
+            Book book = new Book();
 
             for (int i = 0; sr.EndOfStream == false; i++)
             {
-                txt += sr.ReadLine() + "\n";
+                //$"{Title}|{Edition}|{Author}|{Isbn}|{Reading}|{Borrowed}";
+                txt = sr.ReadLine();
+                //Console.WriteLine(txt);
+                string[] vet = txt.Split('|');
+                book.Title = vet[0];
+                book.Edition = int.Parse(vet[1]);
+                book.Author.Name = vet[2];
+                book.Author.LastName = vet[3];
+                book.Isbn = vet[4];
+
+                if (vet[5].Contains('t'))
+                {
+                    book.Reading = true;
+                }
+                if (vet[5].Contains('f'))
+                {
+                    book.Reading = false;
+                }
+
+                if (vet[6].Contains('t'))
+                {
+                    book.Borrowed = true;
+                }
+                if (vet[6].Contains('f'))
+                {
+                    book.Borrowed = false;
+                }
+                //Console.WriteLine(book.ToString());
+                bookList.Add(book);
             }
 
             return bookList;
