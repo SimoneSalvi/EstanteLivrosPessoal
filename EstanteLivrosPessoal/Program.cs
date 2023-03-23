@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.Design;
+using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography.X509Certificates;
+using System.Xml.Linq;
 using EstanteLivrosPessoal;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -36,7 +38,35 @@ internal class Program
                 case 4:
                     PrintBookList(EstanteParaLista());
                     break;
-                    
+                case 5:
+                    PrintBookList(LeituraParaLista());
+                    break;
+                case 6:
+                    PrintBookList(EmprestadosParaLista());
+                    break;
+                case 7:
+                    Console.WriteLine("\nQual arquivo você quer editar?" +
+                                      "\n   [1 - Estante]" +
+                                      "\n   [2 - Leitura]" +
+                                      "\n   [3 - Emprestado]");
+                    int n = int.Parse(Console.ReadLine());
+                    if (n == 1)
+                    {
+                        EstanteParaLista();
+                    }
+                    if (n == 2)
+                    {
+                        LeituraParaLista();
+                    }
+                    if (n == 3)
+                    {
+                        PrintBookList(EmprestadosParaLista());
+                    }
+                    EditBook(FindBook());
+                    //LerSepararLista(bookList);
+                    bookList.Clear();
+                    break;
+
             }
 
         } while (!flag);
@@ -44,7 +74,7 @@ internal class Program
         // criação de objeto livro e inserção na lista
         int Menu()
         {
-            Console.WriteLine("Digite a opção:");
+            Console.WriteLine("\n\nDigite a opção:\n");
             Console.WriteLine("     0 - Sair");
             Console.WriteLine("     1 - Adicionar novo livro a estante");
             Console.WriteLine("     2 - Exibir lista de livros");
@@ -52,6 +82,7 @@ internal class Program
             Console.WriteLine("     4 - Arquivo dos livros da estante");
             Console.WriteLine("     5 - Arquivo dos livros que estou lendo");
             Console.WriteLine("     6 - Arquivo dos livros emprestados");
+            Console.WriteLine("     7 - Alternar livro entre os arquivos");
             op = int.Parse(Console.ReadLine());
             return op;
         }
@@ -132,7 +163,7 @@ internal class Program
         {
             foreach (Book book in l)
             {
-                if(book.Borrowed == false && book.Reading == false)
+                if (book.Borrowed == false && book.Reading == false)
                 {
                     string aux = book.ToString();
                     WriteFileEstante(aux);
@@ -150,11 +181,26 @@ internal class Program
             }
         }
 
+       /*void SobrescreverArquivoEstante(List<Book> l)
+        {
+            foreach (Book book in l)
+            {
+                
+                StreamWriter sw = new("livrosEstante.txt");
+                string texto = book.ToString();
+                sw.WriteLine(texto);
+                sw.Close();
+
+            }
+            File.WriteAllText("livrosEstante.txt", )
+            Console.WriteLine("Arquivo Estante atualizado com sucesso com Sucesso!");
+        }*/
+
         void WriteFileEstante(string texto)
         {
             try
             {
-                if(File.Exists("livrosEstante.txt"))
+                if (File.Exists("livrosEstante.txt"))
                 {
                     var aux = ReadFile("livrosEstante.txt");
                     StreamWriter sw = new StreamWriter("livrosEstante.txt");
@@ -262,16 +308,19 @@ internal class Program
             }
         }
 
+        // Leitura dos arquivos retornando uma lista
         List<Book> EstanteParaLista()
         {
+            bookList.Clear();
             StreamReader sr = new("livrosEstante.txt");
             string txt = "";
             string aux = "";
-            Book book = new Book();
-            Author author = new Author();
+
 
             for (int i = 0; sr.EndOfStream == false; i++)
             {
+                Book book = new Book();
+                Author author = new Author();
                 //$"{Title}|{Edition}|{Author}|{Isbn}|{Reading}|{Borrowed}";
 
                 txt = sr.ReadLine();
@@ -322,5 +371,234 @@ internal class Program
 
             return bookList;
         }
+
+        List<Book> EmprestadosParaLista()
+        {
+            bookList.Clear();
+            StreamReader sr = new("livrosEmprestado.txt");
+            string txt = "";
+            string aux = "";
+
+            for (int i = 0; sr.EndOfStream == false; i++)
+            {
+                Book book = new Book();
+                Author author = new Author();
+                //$"{Title}|{Edition}|{Author}|{Isbn}|{Reading}|{Borrowed}";
+
+                txt = sr.ReadLine();
+
+                //Console.WriteLine(txt);
+
+                string[] vet = txt.Split('|');
+
+                //Console.WriteLine($"{vet[0]}   {vet[1]}   {vet[2]}  {vet[3]}   {vet[4]}  {vet[5]}  {vet[6]}");
+
+                string s = vet[0];
+                book.Title = s;
+
+                int n = int.Parse(vet[1]);
+                book.Edition = n;
+
+                s = vet[2];
+                author.Name = s;
+                book.Author = author;
+
+                s = vet[3];
+                author.LastName = s;
+                book.Author = author;
+
+                s = vet[4];
+                book.Isbn = s;
+
+                if (vet[5].Contains('t'))
+                {
+                    book.Reading = true;
+                }
+                if (vet[5].Contains('f'))
+                {
+                    book.Reading = false;
+                }
+
+                if (vet[6].Contains('t'))
+                {
+                    book.Borrowed = true;
+                }
+                if (vet[6].Contains('f'))
+                {
+                    book.Borrowed = false;
+                }
+                //Console.WriteLine(book.ToString());
+                bookList.Add(book);
+            }
+
+            return bookList;
+        }
+
+        List<Book> LeituraParaLista()
+        {
+            bookList.Clear();
+            StreamReader sr = new("livrosLeitura.txt");
+            string txt = "";
+            string aux = "";
+
+            for (int i = 0; sr.EndOfStream == false; i++)
+            {
+                Book book = new Book();
+                Author author = new Author();
+                //$"{Title}|{Edition}|{Author}|{Isbn}|{Reading}|{Borrowed}";
+
+                txt = sr.ReadLine();
+
+                //Console.WriteLine(txt);
+
+                string[] vet = txt.Split('|');
+
+                //Console.WriteLine($"{vet[0]}   {vet[1]}   {vet[2]}  {vet[3]}   {vet[4]}  {vet[5]}  {vet[6]}");
+
+                string s = vet[0];
+                book.Title = s;
+
+                int n = int.Parse(vet[1]);
+                book.Edition = n;
+
+                s = vet[2];
+                author.Name = s;
+                book.Author = author;
+
+                s = vet[3];
+                author.LastName = s;
+                book.Author = author;
+
+                s = vet[4];
+                book.Isbn = s;
+
+                if (vet[5].Contains('t'))
+                {
+                    book.Reading = true;
+                }
+                if (vet[5].Contains('f'))
+                {
+                    book.Reading = false;
+                }
+
+                if (vet[6].Contains('t'))
+                {
+                    book.Borrowed = true;
+                }
+                if (vet[6].Contains('f'))
+                {
+                    book.Borrowed = false;
+                }
+                //Console.WriteLine(book.ToString());
+                bookList.Add(book);
+            }
+
+            return bookList;
+        }
+
+        Book FindBook()
+        {
+            Console.WriteLine("Qual o nome do livro que você quer editar?");
+            string s = Console.ReadLine();
+
+            foreach (var item in bookList)
+            {
+                if (item.Title.Equals(s))
+                {
+                    return item;
+                }
+            }
+            return null;
+        }
+
+        void EditBook(Book book)
+        {
+            Author author = book.Author;
+            string s;
+            int n;
+
+            Book booklOld = book;
+
+            /*Console.WriteLine("Qual o novo nome do livro?");
+            s = Console.ReadLine();
+            book.Title = s;
+
+            Console.WriteLine("Qual a nova edição:");
+            n = int.Parse(Console.ReadLine());
+            book.Edition = n;
+
+            Console.WriteLine("Qual o novo isbn ?");
+            s = Console.ReadLine();
+            book.Isbn = s;
+
+            Console.WriteLine("Qual o novo nome do autor?");
+            s = Console.ReadLine();
+            author.Name = s;
+
+            Console.WriteLine("Qual o novo sobrenome do autor?");
+            s = Console.ReadLine();
+            author.LastName = s;
+
+            book.Author = author;*/
+
+            Console.WriteLine("Para onde vai o livro: \n[1 - estante]\n[2 - leitura]\n[3 - emprestado]");
+            int op = int.Parse(Console.ReadLine());
+            if (op == 1)
+            {
+                book.Reading = false;
+                book.Borrowed = false;
+            }
+            if (op == 2)
+            {
+                book.Reading = true;
+                book.Borrowed = false;
+            }
+            if (op == 3)
+            {
+                book.Reading = false;
+                book.Borrowed = true;
+            }
+
+            string aux = book.ToString();
+
+            //Remover livro do arquivo 
+            /*if (booklOld.Borrowed == false && booklOld.Reading == false)
+            {
+                bookList.Remove(booklOld);
+                //LerSepararLista(bookList);
+                SobrescreverArquivoEstante(bookList);
+            }
+            if (booklOld.Borrowed == false && booklOld.Reading == true)
+            {
+                bookList.Remove(booklOld);
+                //LerSepararLista(bookList);
+                //SobrescreverArquivoLeitura(bookList);
+            }
+            if (booklOld.Borrowed == true && booklOld.Reading == false)
+            {
+                bookList.Remove(booklOld);
+                //LerSepararLista(bookList);
+                //SobrescreverArquivoEmprestado(bookList);
+            }*/
+
+            //Salvar livro no arquivo
+            if (book.Borrowed == false && book.Reading == false)
+            {
+                aux = book.ToString();
+                WriteFileEstante(aux);
+            }
+            if (book.Borrowed == false && book.Reading == true)
+            {
+                aux = book.ToString();
+                WriteFileLeitura(aux);
+            }
+            if (book.Borrowed == true && book.Reading == false)
+            {
+                aux = book.ToString();
+                WriteFileEmprestado(aux);
+            }
+            
+        }
+
     }
 }
