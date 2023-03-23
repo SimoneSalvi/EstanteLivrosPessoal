@@ -181,7 +181,7 @@ internal class Program
             }
         }
 
-       /*void SobrescreverArquivoEstante(List<Book> l)
+       void SobrescreverArquivoEstante(List<Book> l)
         {
             foreach (Book book in l)
             {
@@ -192,9 +192,9 @@ internal class Program
                 sw.Close();
 
             }
-            File.WriteAllText("livrosEstante.txt", )
+            //File.WriteAllText("livrosEstante.txt", )
             Console.WriteLine("Arquivo Estante atualizado com sucesso com Sucesso!");
-        }*/
+        }
 
         void WriteFileEstante(string texto)
         {
@@ -562,7 +562,7 @@ internal class Program
             string aux = book.ToString();
 
             //Remover livro do arquivo 
-            /*if (booklOld.Borrowed == false && booklOld.Reading == false)
+            if (booklOld.Borrowed == false && booklOld.Reading == false)
             {
                 bookList.Remove(booklOld);
                 //LerSepararLista(bookList);
@@ -579,7 +579,7 @@ internal class Program
                 bookList.Remove(booklOld);
                 //LerSepararLista(bookList);
                 //SobrescreverArquivoEmprestado(bookList);
-            }*/
+            }
 
             //Salvar livro no arquivo
             if (book.Borrowed == false && book.Reading == false)
