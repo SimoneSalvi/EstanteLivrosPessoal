@@ -268,18 +268,36 @@ internal class Program
             string txt = "";
             string aux = "";
             Book book = new Book();
+            Author author = new Author();
 
             for (int i = 0; sr.EndOfStream == false; i++)
             {
                 //$"{Title}|{Edition}|{Author}|{Isbn}|{Reading}|{Borrowed}";
+
                 txt = sr.ReadLine();
+
                 //Console.WriteLine(txt);
+
                 string[] vet = txt.Split('|');
-                book.Title = vet[0];
-                book.Edition = int.Parse(vet[1]);
-                book.Author.Name = vet[2];
-                book.Author.LastName = vet[3];
-                book.Isbn = vet[4];
+
+                //Console.WriteLine($"{vet[0]}   {vet[1]}   {vet[2]}  {vet[3]}   {vet[4]}  {vet[5]}  {vet[6]}");
+
+                string s = vet[0];
+                book.Title = s;
+
+                int n = int.Parse(vet[1]);
+                book.Edition = n;
+
+                s = vet[2];
+                author.Name = s;
+                book.Author = author;
+
+                s = vet[3];
+                author.LastName = s;
+                book.Author = author;
+
+                s = vet[4];
+                book.Isbn = s;
 
                 if (vet[5].Contains('t'))
                 {
